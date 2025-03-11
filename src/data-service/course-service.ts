@@ -1,6 +1,7 @@
 // import { DummyData } from "../models/DummyData";
 import { Course } from "../model/Course";
 import { Request, Response, NextFunction } from "express";
+import { v4 as uuidv4 } from 'uuid';
 
 const pgp = require('pg-promise')();
 
@@ -35,6 +36,10 @@ const getDBTools = () => {
 
 const { postgresDB, PQ } = getDBTools();
 
+
+// ===============================================================================
+// GET ALL COURSES BY USER ID
+// ===============================================================================
 export const getAllCoursesByUserID = (req: Request, res: Response, next: NextFunction) => {
 
     const dummyData: any = {...req.body};
@@ -85,3 +90,189 @@ export const getAllCoursesByUserID = (req: Request, res: Response, next: NextFun
         });
 
 };
+
+export const postNewCourse = (req: Request, res: Response, next: NextFunction) => {
+
+    // ===================
+    // Parse Course Data
+    // Parse Chapter Data with CourseID
+    // Parse Section Data with ChapterID
+    // ===================
+
+    const courseData = {...req.body.data};
+    const chapterData = {...courseData.courseChapters[0]};
+    const sectionData = courseData.courseChapters[0].section;
+
+    const courseID = uuidv4();
+    const chapterID = uuidv4();
+    const sectionID = uuidv4();
+
+
+    console.log('[postNewCourse] Course Data: ',courseData);
+    console.log('[postNewCourse] Chapter Data: ',courseData.courseChapters[0]);
+    console.log('[postNewCourse] Section Data: ',courseData.courseChapters[0].section);
+
+
+    // ======================
+    // Run async queries sequentially
+    // ======================
+    insertCourseIntoCourseTable(courseData, courseID, res)
+        .then((response: any) => {
+            
+            return insertChapterIntoChapterTable(chapterData, courseID, chapterID, res);
+
+        })
+        .then((response: any) => {
+            
+            sectionData.forEach((section: any) => {
+                
+                return insertSectionIntoSectionTable(section, chapterID, sectionID, res);
+            
+            });
+
+        })
+        .catch((error: any) => {
+
+            console.log("Error: ", error);
+
+        });
+        
+};
+
+export const insertCourseIntoCourseTable = (courseData: any, courseID: string, res: Response): Promise<any> =>{
+
+    const query = new PQ({
+        // text: `INSERT INTO public.\"course\" WHERE id = $1, name = $2, topic = $3`}
+        text: `INSERT INTO public.\"course\"(id,name,topic) VALUES($1,$2,$3)`}
+    );
+
+    query.values = [
+        // dummyData.id
+        courseID,
+        courseData.courseTitle,
+        courseData.topic
+    ]
+
+    return postgresDB.any(query)
+        .then((response: any) => {
+            
+            console.log("[getAllCoursesByUserID] Response: ", response);
+
+            // return res.status(200).json({
+            //     status: 200,
+            //     message: '[Success] insertCourseIntoCourseTable',
+            //     data: response
+            // });
+
+            return {
+                dbStatus: 200,
+                message: '[Success] insertCourseIntoCourseTable',
+            };
+        
+        })
+        .catch((error: any) => {
+
+            console.log("Error: ", error);
+
+            return { 
+                dbStatus: 500,
+                message: error,
+                
+            };
+        
+        });
+
+
+}
+
+export const insertChapterIntoChapterTable = (chapterData: any, courseID: string, chapterID: string, res: Response): Promise<any> =>{
+
+    const query = new PQ({
+        // text: `INSERT INTO public.\"chapter\" WHERE id = $1, title = $2, courseID = $2, chapterNumber = $3`}
+        text: `INSERT INTO public.\"chapter\"(id,"title","courseID","chapterNumber") VALUES($1,$2,$3,$4)`}
+    );
+
+    console.log("[insertChapterIntoChapterTable] chapterTitle: ", chapterData);
+    console.log("[insertChapterIntoChapterTable] chapterTitle: ", chapterData.chapterTitle);
+
+    query.values = [
+        
+        chapterID,
+        chapterData.chapterTitle,
+        courseID,
+        chapterData.chapterNumber
+
+    ]
+
+    return postgresDB.any(query)
+        .then((response: any) => {
+            
+            console.log("[insertChapterIntoChapterTable] Response: ", response);
+
+            return {
+                dbStatus: 200,
+                message: '[Success] insertChapterIntoChapterTable',
+            };
+        
+        })
+        .catch((error: any) => {
+
+            console.log("Error: ", error);
+
+            return { 
+                dbStatus: 500,
+                message: error,
+                
+            };
+        
+        });
+
+
+}
+
+export const insertSectionIntoSectionTable = (sectionData: any, chapterID: string, sectionID: string, res: Response): Promise<any> =>{
+
+    const query = new PQ({
+        // text: `INSERT INTO public.\"section\" WHERE id = $1, title = $2, sectionNumber = $3, chapterID = $4`}
+        text: `INSERT INTO public.\"section\"(id,title,"sectionNumber","chapterID") VALUES($1,$2,$3,$4)`}
+    );
+
+    query.values = [
+        // dummyData.id
+        sectionID,
+        sectionData.sectionTitle,
+        sectionData.sectionNumber,
+        chapterID
+    ]
+
+    return postgresDB.any(query)
+        .then((response: any) => {
+            
+            console.log("[insertSectionIntoSectionTable] Response: ", response);
+
+            // return res.status(200).json({
+            //     status: 200,
+            //     message: '[Success] insertSectionIntoSectionTable',
+            //     data: response
+            // });
+
+            return {
+                dbStatus: 200,
+                message: '[Success] insertSectionIntoSectionTable',
+            }
+        
+        })
+        .catch((error: any) => {
+
+            console.log("Error: ", error);
+
+            return { 
+                dbStatus: 500,
+                message: error,
+                
+            };
+        
+        });
+
+
+}
