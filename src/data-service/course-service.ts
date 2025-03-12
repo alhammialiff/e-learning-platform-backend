@@ -91,6 +91,38 @@ export const getAllCoursesByUserID = (req: Request, res: Response, next: NextFun
 
 };
 
+export const getAllCourse_SuperUser = (req: Request, res: Response, next: NextFunction) => {
+    
+    const query = new PQ({
+        text: `SELECT * FROM public.\"course\"`}
+    );
+
+    return postgresDB.any(query)
+        .then((response: any)=>{
+            
+            console.log("Response: ", response);
+
+            return response;
+            // return res.status(200).json({
+            //     status: 200,
+            //     message: '[Success] Courses retrieved',
+            //     data: response
+            // });
+
+        })
+        .then((data: any) => {
+
+            return res.status(200).json({
+                status: 200,
+                message: '[Success] Courses retrieved',
+                data: data
+            })
+
+
+        });
+
+}   
+
 export const postNewCourse = (req: Request, res: Response, next: NextFunction) => {
 
     // ===================
@@ -98,14 +130,13 @@ export const postNewCourse = (req: Request, res: Response, next: NextFunction) =
     // Parse Chapter Data with CourseID
     // Parse Section Data with ChapterID
     // ===================
-
     const courseData = {...req.body.data};
     const chapterData = {...courseData.courseChapters[0]};
     const sectionData = courseData.courseChapters[0].section;
 
     const courseID = uuidv4();
     const chapterID = uuidv4();
-    const sectionID = uuidv4();
+    // const sectionID = uuidv4();
 
 
     console.log('[postNewCourse] Course Data: ',courseData);
@@ -126,6 +157,8 @@ export const postNewCourse = (req: Request, res: Response, next: NextFunction) =
             
             sectionData.forEach((section: any) => {
                 
+                const sectionID = uuidv4();
+
                 return insertSectionIntoSectionTable(section, chapterID, sectionID, res);
             
             });
@@ -143,7 +176,7 @@ export const insertCourseIntoCourseTable = (courseData: any, courseID: string, r
 
     const query = new PQ({
         // text: `INSERT INTO public.\"course\" WHERE id = $1, name = $2, topic = $3`}
-        text: `INSERT INTO public.\"course\"(id,name,topic) VALUES($1,$2,$3)`}
+        text: `INSERT INTO public.\"course\"(id,title,topic) VALUES($1,$2,$3)`}
     );
 
     query.values = [

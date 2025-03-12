@@ -1,6 +1,6 @@
 import express, { Express, NextFunction, Request, Response } from 'express';
 import dotenv from 'dotenv';
-import { getAllCoursesByUserID, postNewCourse } from './data-service/course-service';
+import { getAllCourse_SuperUser, getAllCoursesByUserID, postNewCourse } from './data-service/course-service';
 import multer from 'multer';
 import { FileMetaData } from './model/FileMetaData';
 import { getCurrentTimestamp } from './data-service/time-service';
@@ -61,7 +61,8 @@ app.post('/api/course/all', (req:Request, res:Response, next:NextFunction) => {
 
   next();
 
-}, getAllCoursesByUserID);
+}, getAllCourse_SuperUser);
+// }, getAllCoursesByUserID);
 
 
 
@@ -72,6 +73,7 @@ app.post('/api/course/new', (req: Request, res: Response, next: NextFunction) =>
   next();
 
 }, postNewCourse);
+
 
 
 
