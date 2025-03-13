@@ -4,6 +4,7 @@ import { getAllCourse_SuperUser, getAllCoursesByUserID, postNewCourse } from './
 import multer from 'multer';
 import { FileMetaData } from './model/FileMetaData';
 import { getCurrentTimestamp } from './data-service/time-service';
+import { getAllPublicUserData } from './data-service/user-service';
 
 
 dotenv.config();
@@ -52,6 +53,15 @@ app.get('/', (req: Request, res: Response) => {
   res.send('Not LMS 249 prototype backend');
 });
 
+
+app.post('/api/user/all', (req:Request, res:Response, next:NextFunction) => {
+  
+
+  console.log("[getAllUsers] Hit ");
+
+  next();
+
+}, getAllPublicUserData);
 
 
 app.post('/api/course/all', (req:Request, res:Response, next:NextFunction) => {
