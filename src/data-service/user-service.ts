@@ -36,7 +36,6 @@ const getDBTools = () => {
 const { postgresDB, PQ } = getDBTools();
 
 
-
 export const getAllPublicUserData = (req: Request, res: Response, next: NextFunction) => {
 
     const query = new PQ({

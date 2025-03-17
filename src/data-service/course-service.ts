@@ -2,6 +2,7 @@
 import { Course } from "../model/Course";
 import { Request, Response, NextFunction } from "express";
 import { v4 as uuidv4 } from 'uuid';
+import { getCurrentTimestamp } from "./time-service";
 
 const pgp = require('pg-promise')();
 
@@ -48,8 +49,8 @@ export const getAllCoursesByUserID = (req: Request, res: Response, next: NextFun
     console.log(dummyData);
     
     const query = new PQ({
-        text: `SELECT * FROM public.\"enrollments\" WHERE userid = $1`}
-    );
+        text: `SELECT * FROM public.\"enrollments\" WHERE userid = $1`
+    });
 
     if(!req.body){
 
@@ -123,7 +124,7 @@ export const getAllCourse_SuperUser = (req: Request, res: Response, next: NextFu
 
 }   
 
-export const postNewCourse = (req: Request, res: Response, next: NextFunction) => {
+export const postNewCourse = async (req: Request, res: Response, next: NextFunction) => {
 
     // ===================
     // Parse Course Data
@@ -147,7 +148,7 @@ export const postNewCourse = (req: Request, res: Response, next: NextFunction) =
     // ======================
     // Run async queries sequentially
     // ======================
-    insertCourseIntoCourseTable(courseData, courseID, res)
+    const queryChain = insertCourseIntoCourseTable(courseData, courseID, res)
         .then((response: any) => {
             
             return insertChapterIntoChapterTable(chapterData, courseID, chapterID, res);
@@ -169,6 +170,24 @@ export const postNewCourse = (req: Request, res: Response, next: NextFunction) =
             console.log("Error: ", error);
 
         });
+
+    try{
+
+        return res.status(200).json({        
+            status: 200,
+            message: '[Success] postNewCourse',
+            timestamp: getCurrentTimestamp()
+        });
+
+    }catch(error: any){ 
+
+        return res.status(500).json({        
+            status: 500,
+            message: error,
+            timestamp: getCurrentTimestamp()
+        });
+
+    }
         
 };
 

@@ -5,6 +5,7 @@ import multer from 'multer';
 import { FileMetaData } from './model/FileMetaData';
 import { getCurrentTimestamp } from './data-service/time-service';
 import { getAllPublicUserData } from './data-service/user-service';
+import { postCourseEnrollment } from './data-service/enroll-service';
 
 
 dotenv.config();
@@ -80,9 +81,9 @@ app.post('/api/course/new', (req: Request, res: Response, next: NextFunction) =>
 
   console.log("[postNewCourse | FormData Upload] Hit");
 
-  next();
+  postNewCourse(req, res, next);
 
-}, postNewCourse);
+});
 
 
 
@@ -98,6 +99,14 @@ app.post('/api/course/new/upload', upload.array('files[]'), (req: Request, res: 
   })
 
 });
+
+app.post('/api/course/enrollByUser', (req: Request, res: Response, next: NextFunction) => {
+
+  console.log("[postCourseEnrollment] Hit");
+
+  next();
+
+}, postCourseEnrollment);
 
 app.listen(port, () => {
   console.log(`[server]: LMS 249 prototype backend is running at http://localhost:${port}`);
