@@ -1,6 +1,6 @@
 import express, { Express, NextFunction, Request, Response } from 'express';
 import dotenv from 'dotenv';
-import { getAllCourse_SuperUser, getAllCoursesByUserID, postNewCourse } from './data-service/course-service';
+import { getAllCourse_SuperUser, getAllCoursesByUserID, getCourseByCourseID, postNewCourse } from './data-service/course-service';
 import multer from 'multer';
 import { FileMetaData } from './model/FileMetaData';
 import { getCurrentTimestamp } from './data-service/time-service';
@@ -54,6 +54,12 @@ app.get('/', (req: Request, res: Response) => {
   res.send('Not LMS 249 prototype backend');
 });
 
+app.post('/api/course/id', (req:Request, res:Response, next:NextFunction) => {
+  
+  next();
+
+}, getCourseByCourseID);
+
 
 app.post('/api/user/all', (req:Request, res:Response, next:NextFunction) => {
   
@@ -75,8 +81,6 @@ app.post('/api/course/all', (req:Request, res:Response, next:NextFunction) => {
 }, getAllCourse_SuperUser);
 // }, getAllCoursesByUserID);
 
-
-
 app.post('/api/course/new', (req: Request, res: Response, next: NextFunction) => {
 
   console.log("[postNewCourse | FormData Upload] Hit");
@@ -84,9 +88,6 @@ app.post('/api/course/new', (req: Request, res: Response, next: NextFunction) =>
   postNewCourse(req, res, next);
 
 });
-
-
-
 
 app.post('/api/course/new/upload', upload.array('files[]'), (req: Request, res: Response) => {
 

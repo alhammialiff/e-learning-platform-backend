@@ -92,6 +92,62 @@ export const getAllCoursesByUserID = (req: Request, res: Response, next: NextFun
 
 };
 
+// ===============================================================================
+// GET COURSE BY Course ID
+// ===============================================================================
+export const getCourseByCourseID = (req: Request, res: Response, next: NextFunction) => {
+
+    // const dummyData: any = {...req.body};
+    const courseID: string = req.body.data.courseID;
+
+    console.log(courseID);
+    
+    const query = new PQ({
+        text: `SELECT * FROM public.\"course\" WHERE id = $1`
+    });
+
+    if(!req.body){
+
+        return res.status(400).json({
+            status: 400,
+            error: '[Error] Empty request body'
+        })
+
+    }
+
+    query.values = [
+        // dummyData.id
+        courseID
+    ]
+
+
+
+    return postgresDB.any(query)
+        .then((response: any) => {
+            
+            console.log("[getCourseByCourseID] Response: ", response);
+
+            return res.status(200).json({
+                status: 200,
+                message: '[Success] Courses by User ID retrieved',
+                data: response
+            });
+        
+        })
+        .catch((error: any) => {
+
+            console.log("Error: ", error);
+
+            return res.status(500).json({ 
+                status: 500,
+                message: error,
+                data: null
+            });
+        
+        });
+
+};
+
 export const getAllCourse_SuperUser = (req: Request, res: Response, next: NextFunction) => {
     
     const query = new PQ({

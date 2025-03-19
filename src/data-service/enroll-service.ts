@@ -54,7 +54,6 @@ export const postCourseEnrollment = async (req: Request, res: Response, next: Ne
             text: `INSERT INTO public.\"enrollments\"(userid,courseid) VALUES($1,$2)`}
         );
     
-
         query.values = [
             // dummyData.id
             user.id,
