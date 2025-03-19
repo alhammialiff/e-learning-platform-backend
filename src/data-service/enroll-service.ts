@@ -51,7 +51,7 @@ export const postCourseEnrollment = async (req: Request, res: Response, next: Ne
 
         const query = new PQ({
             // text: `INSERT INTO public.\"enrollment\"(userid,courseid,completion,currentprogress) VALUES($1,$2,$3,$4)`}
-            text: `INSERT INTO public.\"enrollments\"(userid,courseid) VALUES($1,$2)`}
+            text: `INSERT INTO public.\"enrollments\"(user_id,course_id) VALUES($1,$2)`}
         );
     
         query.values = [

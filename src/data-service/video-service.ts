@@ -32,6 +32,17 @@ const getDBTools = () => {
         postgresDB: db,
         PQ: PQ
     }
+
 }
 
 const { postgresDB, PQ } = getDBTools();
+
+// getVideo
+
+export const insertVideoMetaData = (req: Request, res: Response, next: NextFunction) => {
+
+    const videoID = uuidv4();
+
+    const filePath = req.body.video;
+
+}

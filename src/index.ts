@@ -91,7 +91,7 @@ app.post('/api/course/new', (req: Request, res: Response, next: NextFunction) =>
 
 app.post('/api/course/new/upload', upload.array('files[]'), (req: Request, res: Response) => {
 
-  console.log("[postNewCourse | Multimedia Upload] Hit", req.file);
+  console.log("[postNewCourse | Multimedia Upload] Hit", req.files);
 
   res.status(200).send({
     status: 200,

@@ -151,7 +151,7 @@ export const getCourseByCourseID = (req: Request, res: Response, next: NextFunct
 export const getAllCourse_SuperUser = (req: Request, res: Response, next: NextFunction) => {
     
     const query = new PQ({
-        text: `SELECT * FROM public.\"course\"`}
+        text: `SELECT * FROM public.\"courses\"`}
     );
 
     return postgresDB.any(query)
@@ -251,7 +251,7 @@ export const insertCourseIntoCourseTable = (courseData: any, courseID: string, r
 
     const query = new PQ({
         // text: `INSERT INTO public.\"course\" WHERE id = $1, name = $2, topic = $3`}
-        text: `INSERT INTO public.\"course\"(id,title,topic) VALUES($1,$2,$3)`}
+        text: `INSERT INTO public.\"courses\"(id,name,topic) VALUES($1,$2,$3)`}
     );
 
     query.values = [
@@ -297,7 +297,7 @@ export const insertChapterIntoChapterTable = (chapterData: any, courseID: string
 
     const query = new PQ({
         // text: `INSERT INTO public.\"chapter\" WHERE id = $1, title = $2, courseID = $2, chapterNumber = $3`}
-        text: `INSERT INTO public.\"chapter\"(id,"title","courseID","chapterNumber") VALUES($1,$2,$3,$4)`}
+        text: `INSERT INTO public.\"chapters\"(id,"name","course_id","chapter_number") VALUES($1,$2,$3,$4)`}
     );
 
     console.log("[insertChapterIntoChapterTable] chapterTitle: ", chapterData);
@@ -342,7 +342,7 @@ export const insertSectionIntoSectionTable = (sectionData: any, chapterID: strin
 
     const query = new PQ({
         // text: `INSERT INTO public.\"section\" WHERE id = $1, title = $2, sectionNumber = $3, chapterID = $4`}
-        text: `INSERT INTO public.\"section\"(id,title,"sectionNumber","chapterID") VALUES($1,$2,$3,$4)`}
+        text: `INSERT INTO public.\"sections\"(id,name,"section_number","chapter_id") VALUES($1,$2,$3,$4)`}
     );
 
     query.values = [
