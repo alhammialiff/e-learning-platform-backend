@@ -37,7 +37,9 @@ const getDBTools = () => {
 
 const { postgresDB, PQ } = getDBTools();
 
-// getVideo
+// 
+
+
 
 export const insertVideoMetaData = (req: Request, res: Response, next: NextFunction) => {
 

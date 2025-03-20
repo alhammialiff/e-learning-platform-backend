@@ -54,13 +54,18 @@ app.get('/', (req: Request, res: Response) => {
   res.send('Not LMS 249 prototype backend');
 });
 
+// ==================================
+// POST Get Course By Course ID
+// ==================================
 app.post('/api/course/id', (req:Request, res:Response, next:NextFunction) => {
   
   next();
 
 }, getCourseByCourseID);
 
-
+// ==================================
+// POST Get All Users (Public Data)
+// ==================================
 app.post('/api/user/all', (req:Request, res:Response, next:NextFunction) => {
   
 
@@ -70,7 +75,9 @@ app.post('/api/user/all', (req:Request, res:Response, next:NextFunction) => {
 
 }, getAllPublicUserData);
 
-
+// ==================================
+// POST Get All Courses
+// ==================================
 app.post('/api/course/all', (req:Request, res:Response, next:NextFunction) => {
   
 
@@ -81,25 +88,39 @@ app.post('/api/course/all', (req:Request, res:Response, next:NextFunction) => {
 }, getAllCourse_SuperUser);
 // }, getAllCoursesByUserID);
 
-app.post('/api/course/new', (req: Request, res: Response, next: NextFunction) => {
 
-  console.log("[postNewCourse | FormData Upload] Hit");
+// ==================================
+// POST Create New Course 
+// ==================================
+// app.post('/api/course/new', (req: Request, res: Response, next: NextFunction) => {
+
+//   console.log("[postNewCourse | FormData Upload] Hit");
+
+//   postNewCourse(req, res, next);
+
+// });
+app.post('/api/course/new', upload.array('files[]'), (req: Request, res: Response, next: NextFunction) => {
+
+  // console.log("[postNewCourse | FormData Upload] Hit", JSON.parse(req.body?.courseData));
 
   postNewCourse(req, res, next);
 
 });
 
-app.post('/api/course/new/upload', upload.array('files[]'), (req: Request, res: Response) => {
+// ==================================
+// POST Upload New Course Multimedia (SHELVED)
+// ==================================
+// app.post('/api/course/new/upload', upload.array('files[]'), (req: Request, res: Response) => {
 
-  console.log("[postNewCourse | Multimedia Upload] Hit", req.files);
+//   console.log("[postNewCourse | Multimedia Upload] Hit", req.files);
 
-  res.status(200).send({
-    status: 200,
-    message: "Multimedia Files uploaded successfully",
-    timestamp: getCurrentTimestamp()
-  })
+//   res.status(200).send({
+//     status: 200,
+//     message: "Multimedia Files uploaded successfully",
+//     timestamp: getCurrentTimestamp()
+//   })
 
-});
+// });
 
 app.post('/api/course/enrollByUser', (req: Request, res: Response, next: NextFunction) => {
 

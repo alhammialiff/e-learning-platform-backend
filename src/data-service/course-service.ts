@@ -3,8 +3,48 @@ import { Course } from "../model/Course";
 import { Request, Response, NextFunction } from "express";
 import { v4 as uuidv4 } from 'uuid';
 import { getCurrentTimestamp } from "./time-service";
+import multer from "multer";
+import { FileMetaData } from "../model/FileMetaData";
 
+var path = require('path');
 const pgp = require('pg-promise')();
+
+// =================================
+// Multer File Upload Config
+// =================================
+// const uploadMultimediaToFileSystem = (sectionID: string) =>{
+
+//     const uploadHandler = multer({
+  
+//         storage: multer.diskStorage({
+      
+//           destination: (req: any, file: FileMetaData, cb: any) => {
+      
+//             cb(null, __dirname + "/course-multimedia/")
+      
+//           },
+      
+//           filename: (req: any, file: FileMetaData, cb: any) => {
+      
+//             const uniqueSuffix = Math.round(Math.random() * 1E9);
+//             const fileNameWithoutExtension = file.originalname.split('.')[0];
+//             const fileExtension = file.originalname.split('.')[1];
+//             const reconstructedFileName = fileNameWithoutExtension + '-' + sectionID + '.' + fileExtension;
+      
+//             cb(null, reconstructedFileName);
+      
+//           }
+      
+//         })
+      
+//       });
+      
+//     return uploadHandler;
+
+// }
+
+
+
 
 const getDBTools = () => {
     
@@ -187,7 +227,8 @@ export const postNewCourse = async (req: Request, res: Response, next: NextFunct
     // Parse Chapter Data with CourseID
     // Parse Section Data with ChapterID
     // ===================
-    const courseData = {...req.body.data};
+    // const courseData = {...req.body.data};
+    const courseData = JSON.parse(req.body?.courseData);
     const chapterData = {...courseData.courseChapters[0]};
     const sectionData = courseData.courseChapters[0].section;
 
@@ -216,7 +257,25 @@ export const postNewCourse = async (req: Request, res: Response, next: NextFunct
                 
                 const sectionID = uuidv4();
 
-                return insertSectionIntoSectionTable(section, chapterID, sectionID, res);
+                // Get multimedia filename and format into separate variables
+                var split1 = section?.sectionMultimedia.split('\\')[2];
+                const multimediaFileName = split1.split('.')[0];
+                const multimediaFormat = split1.split('.')[1];
+                const multimediaID = section?.multimediaID;
+
+
+                // Insert section data into section table first
+                return insertSectionIntoSectionTable(section, chapterID, sectionID, res)
+                    .then((response: any) => {
+                        
+                        // Then insert video metadata into materials table 
+                        return insertMultimediaIntoMaterialsTable(sectionID,
+                             multimediaID, 
+                             multimediaFileName,
+                             multimediaFormat, 
+                             res); 
+                    
+                    });
             
             });
 
@@ -378,6 +437,48 @@ export const insertSectionIntoSectionTable = (sectionData: any, chapterID: strin
                 dbStatus: 500,
                 message: error,
                 
+            };
+        
+        });
+
+
+}
+
+export const insertMultimediaIntoMaterialsTable = (sectionID: string, multimediaID: string, multimediaFileName: string, multimediaFormat: string, res: Response): Promise<any> =>{
+
+    const query = new PQ({
+        // text: `INSERT INTO public.\"section\" WHERE id = $1, title = $2, sectionNumber = $3, chapterID = $4`}
+        text: `INSERT INTO public.\"materials\"(id,section_id,"file_path","file_type") VALUES($1,$2,$3,$4)`}
+    );
+
+    // multimediaID = path.base('/src/course-multimedia')
+
+    query.values = [
+        // dummyData.id
+        multimediaID,
+        sectionID,
+        multimediaFileName,
+        multimediaFormat
+    ]
+
+    return postgresDB.any(query)
+        .then((response: any) => {
+            
+            console.log("[insertMultimediaIntoMaterialsTable] Response: ", response);
+
+            return {
+                dbStatus: 200,
+                message: '[Success] insertMultimediaIntoMaterialsTable',
+            }
+        
+        })
+        .catch((error: any) => {
+
+            console.log("Error: ", error);
+
+            return { 
+                dbStatus: 500,
+                message: error,
             };
         
         });
