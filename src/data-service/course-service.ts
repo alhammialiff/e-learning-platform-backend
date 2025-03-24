@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { getCurrentTimestamp } from "./time-service";
 import multer from "multer";
 import { FileMetaData } from "../model/FileMetaData";
+import { get } from "http";
 
 var path = require('path');
 const pgp = require('pg-promise')();
@@ -133,17 +134,60 @@ export const getAllCoursesByUserID = (req: Request, res: Response, next: NextFun
 };
 
 // ===============================================================================
-// GET COURSE BY Course ID
+// GET COURSE BY Course ID (Overview course data without chapters data and sections data)
+// Remember: To refactor when Huay Eeih's stitching method is ready for integration
 // ===============================================================================
-export const getCourseByCourseID = (req: Request, res: Response, next: NextFunction) => {
+export const getComprehensiveCourseData = (req: Request, res: Response, next: NextFunction) => {
+
+    const courseID: string = req.body.data.courseID;
+    var chapterID: string;
+    var sectionID: string;
+
+    const courseObject: any = {};
+    
+    // 1. Select Course By ID Query
+    const queryChain = getOverviewCourseDataByCourseID(req, res, next)
+        .then((response: any) => {
+            
+            // 2. Select Chapters By Course ID
+            return getChaptersDataByCourseID(req, res, courseID);
+
+        })
+        .then((response: any) => {
+
+            chapterID = response.data[0].id;
+            
+            // 3. Get Sections by Chapter ID
+            return getSectionsDataByChapterID(req, res, chapterID);
+
+        })
+        .then((response: any) => {
+           
+            sectionID = response.data[0].id;
+
+            // 4. Get Materials by Section ID
+            return getMaterialsDataBySectionID(req, res, sectionID);
+            
+        });
+    
+    // Select Sections By Each Section ID
+
+    // Restitch Data
+
+}
+
+// ===============================================================================
+// GET COURSE BY Course ID (Overview course data without chapters data and sections data)
+// Remember: To refactor when Huay Eeih's stitching method is ready for integration
+// ===============================================================================
+export const getOverviewCourseDataByCourseID = (req: Request, res: Response, next: NextFunction) => {
 
     // const dummyData: any = {...req.body};
     const courseID: string = req.body.data.courseID;
 
-    console.log(courseID);
     
     const query = new PQ({
-        text: `SELECT * FROM public.\"course\" WHERE id = $1`
+        text: `SELECT * FROM public.\"courses\" WHERE id = $1`
     });
 
     if(!req.body){
@@ -153,40 +197,201 @@ export const getCourseByCourseID = (req: Request, res: Response, next: NextFunct
             error: '[Error] Empty request body'
         })
 
-    }
+    };
 
     query.values = [
         // dummyData.id
         courseID
-    ]
-
-
+    ];
 
     return postgresDB.any(query)
         .then((response: any) => {
             
             console.log("[getCourseByCourseID] Response: ", response);
 
-            return res.status(200).json({
-                status: 200,
-                message: '[Success] Courses by User ID retrieved',
+            return {
+                dbStatus: 200,
+                message: '[Success] Courses by Course ID retrieved',
                 data: response
-            });
+            };
+
+
         
         })
         .catch((error: any) => {
 
             console.log("Error: ", error);
 
-            return res.status(500).json({ 
-                status: 500,
-                message: error,
-                data: null
-            });
+            return             {
+                dbStatus: 400,
+                message: `[Failure] Courses by Course ID retrieved ${error}`,
+            };
         
         });
 
 };
+
+// ===============================================================================
+// GET CHAPTER BY Course ID (Overview course data without chapters data and sections data)
+// Remember: To refactor when Huay Eeih's stitching method is ready for integration
+// ===============================================================================
+export const getChaptersDataByCourseID = (req: Request, res: Response, courseID: string) => {
+
+    // const dummyData: any = {...req.body};
+    // const courseID: string = req.body.data.courseID;
+    
+
+    console.log(courseID);
+    
+    const query = new PQ({
+        text: `SELECT * FROM public.\"chapters\" WHERE course_id = $1`
+    });
+
+    if(!req.body){
+
+        return res.status(400).json({
+            status: 400,
+            error: '[Error] Empty request body'
+        })
+
+    };
+
+    query.values = [
+        // dummyData.id
+        courseID
+    ];
+
+    return postgresDB.any(query)
+        .then((response: any) => {
+            
+            console.log("[getChapterDataDataByCourseID] Response: ", response);
+
+            return {
+                dbStatus: 200,
+                message: '[Success] Chapters by Course ID retrieved',
+                data: response
+            };
+        
+        })
+        .catch((error: any) => {
+
+            console.log("Error: ", error);
+
+            return {
+                dbStatus: 400,
+                message: `[Failure] Chapters by Course ID retrieved ${error}`,
+            };
+        
+        });
+
+};
+
+// ===============================================================================
+// GET SECTIONS BY Course ID (Overview course data without chapters data and sections data)
+// Remember: To refactor when Huay Eeih's stitching method is ready for integration
+// ===============================================================================
+export const getSectionsDataByChapterID = (req: Request, res: Response, chapterID: string) => {
+
+    console.log(chapterID);
+    
+    const query = new PQ({
+        text: `SELECT * FROM public.\"sections\" WHERE chapter_id = $1`
+    });
+
+    if(!req.body){
+
+        return res.status(400).json({
+            status: 400,
+            error: '[Error] Empty request body'
+        })
+
+    };
+
+    query.values = [
+        // dummyData.id
+        chapterID
+    ];
+
+    return postgresDB.any(query)
+        .then((response: any) => {
+            
+            console.log("[getSectionsDataDataByChapterID] Response: ", response);
+
+            return {
+                dbStatus: 200,
+                message: '[Success] Sections by Chapter ID retrieved',
+                data: response
+            };
+        
+        })
+        .catch((error: any) => {
+
+            console.log("Error: ", error);
+
+            return {
+                dbStatus: 400,
+                message: `[Failure] Sections by Course ID retrieved: ${error}`
+            };
+        
+        });
+
+};
+
+// ===============================================================================
+// GET MATERIALS BY Course ID (Overview course data without chapters data and sections data)
+// Remember: To refactor when Huay Eeih's stitching method is ready for integration
+// ===============================================================================
+export const getMaterialsDataBySectionID = (req: Request, res: Response, sectionID: string) => {
+
+    console.log(sectionID);
+    
+    const query = new PQ({
+        text: `SELECT * FROM public.\"materials\" WHERE section_id = $1`
+    });
+
+    if(!req.body){
+
+        return res.status(400).json({
+            status: 400,
+            error: '[Error] Empty request body'
+        });
+
+    };
+
+    query.values = [
+        // dummyData.id
+        sectionID
+    ];
+
+    return postgresDB.any(query)
+        .then((response: any) => {
+            
+            console.log("[getMaterialsDataByChapterID] Response: ", response);
+
+            return {
+                dbStatus: 200,
+                message: '[Success] Materials by Section ID retrieved',
+                data: response
+            };
+        
+        })
+        .catch((error: any) => {
+
+            console.log("Error: ", error);
+
+            return {
+                dbStatus: 400,
+                message: `[Failure] Materials by Section ID retrieved: ${error}`
+            };
+        
+        });
+
+};
+
+
+
+
+
 
 export const getAllCourse_SuperUser = (req: Request, res: Response, next: NextFunction) => {
     
@@ -261,8 +466,9 @@ export const postNewCourse = async (req: Request, res: Response, next: NextFunct
                 var split1 = section?.sectionMultimedia.split('\\')[2];
                 const multimediaFileName = split1.split('.')[0];
                 const multimediaFormat = split1.split('.')[1];
-                const multimediaID = section?.multimediaID;
 
+                // Get multimediaID (created at frontend) from section data
+                const multimediaID = section?.multimediaID;
 
                 // Insert section data into section table first
                 return insertSectionIntoSectionTable(section, chapterID, sectionID, res)

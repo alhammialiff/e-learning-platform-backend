@@ -1,6 +1,6 @@
 import express, { Express, NextFunction, Request, Response } from 'express';
 import dotenv from 'dotenv';
-import { getAllCourse_SuperUser, getAllCoursesByUserID, getCourseByCourseID, postNewCourse } from './data-service/course-service';
+import { getAllCourse_SuperUser, getAllCoursesByUserID, getComprehensiveCourseData, getOverviewCourseDataByCourseID, postNewCourse } from './data-service/course-service';
 import multer from 'multer';
 import { FileMetaData } from './model/FileMetaData';
 import { getCurrentTimestamp } from './data-service/time-service';
@@ -35,7 +35,7 @@ const upload = multer({
       const fileNameWithoutExtension = file.originalname.split('.')[0];
       const fileExtension = file.originalname.split('.')[1];
       const reconstructedFileName = fileNameWithoutExtension + '-' + uniqueSuffix + '.' + fileExtension;
-
+      
       cb(null, reconstructedFileName);
 
     }
@@ -44,11 +44,8 @@ const upload = multer({
 
 });
 
-
-
 app.use(express.json());
 app.use(cors());
-
 
 app.get('/', (req: Request, res: Response) => {
   res.send('Not LMS 249 prototype backend');
@@ -61,7 +58,7 @@ app.post('/api/course/id', (req:Request, res:Response, next:NextFunction) => {
   
   next();
 
-}, getCourseByCourseID);
+}, getComprehensiveCourseData);
 
 // ==================================
 // POST Get All Users (Public Data)
@@ -91,14 +88,8 @@ app.post('/api/course/all', (req:Request, res:Response, next:NextFunction) => {
 
 // ==================================
 // POST Create New Course 
+// Accepts FormData and user-input New Course Data
 // ==================================
-// app.post('/api/course/new', (req: Request, res: Response, next: NextFunction) => {
-
-//   console.log("[postNewCourse | FormData Upload] Hit");
-
-//   postNewCourse(req, res, next);
-
-// });
 app.post('/api/course/new', upload.array('files[]'), (req: Request, res: Response, next: NextFunction) => {
 
   // console.log("[postNewCourse | FormData Upload] Hit", JSON.parse(req.body?.courseData));
@@ -122,6 +113,11 @@ app.post('/api/course/new', upload.array('files[]'), (req: Request, res: Respons
 
 // });
 
+
+// ==================================
+// POST Enroll User By User ID
+// Accepts Course ID and Array of User IDs
+// ==================================
 app.post('/api/course/enrollByUser', (req: Request, res: Response, next: NextFunction) => {
 
   console.log("[postCourseEnrollment] Hit");
