@@ -13,7 +13,7 @@ dotenv.config();
 
 // src/index.js
 const app: Express = express();
-const port = process.env.PORT;
+const port = process.env.PORT || 3005;
 const cors = require('cors');
 
 // =================================

@@ -60,7 +60,8 @@ const getDBTools = () => {
     //                 Backend  -> localhost:3000
     //                 DB       -> localhost:5432
     // ================================================
-    const db = pgp('postgres://postgres:password@localhost:5432/LMS-249-Prototype-DB');
+    // const db = pgp('postgres://postgres:password@localhost:5432/LMS-249-Prototype-DB');
+    const db = pgp('postgres://postgres:password@localhost:5432/postgres');
     
     
     // ===========================================================================
@@ -532,19 +533,33 @@ export const getAllCourse_SuperUser = (req: Request, res: Response, next: NextFu
             console.log("Response: ", response);
 
             return response;
-            // return res.status(200).json({
-            //     status: 200,
-            //     message: '[Success] Courses retrieved',
-            //     data: response
-            // });
 
         })
-        .then((data: any) => {
+        .then((rawData: any) => {
+
+            var retrievedCourseList: Course[] = [];
+            
+            rawData.forEach((d:any)=>{
+                
+                 
+
+                var course: Course = {
+                    id: d?.id,
+                    name: d?.name,
+                    description: d?.description,
+                    topic: d?.topic,
+                    image: d.cover_image_path,
+                    duration: d?.duration 
+                }
+                
+                retrievedCourseList.push(course);
+
+            });
 
             return res.status(200).json({
                 status: 200,
                 message: '[Success] Courses retrieved',
-                data: data
+                data: retrievedCourseList
             })
 
 
