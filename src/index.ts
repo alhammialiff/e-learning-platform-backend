@@ -93,7 +93,6 @@ app.post('/api/course/all', (req:Request, res:Response, next:NextFunction) => {
 app.post('/api/course/new', upload.array('files[]'), (req: Request, res: Response, next: NextFunction) => {
 
   // console.log("[postNewCourse | FormData Upload] Hit", JSON.parse(req.body?.courseData));
-
   postNewCourse(req, res, next);
 
 });

@@ -1,8 +1,11 @@
 export interface Course {
-    id: number;
-    name: string;
-    description: string;
-    image: string;
-    duration: number;
-  }
+
+  id: string;
+  name: string;
+  description: string;
+  topic: string;
+  image?: string;
+  duration: number;
+
+}
   

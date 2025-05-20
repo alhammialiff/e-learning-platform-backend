@@ -6,6 +6,10 @@ import { getCurrentTimestamp } from "./time-service";
 import multer from "multer";
 import { FileMetaData } from "../model/FileMetaData";
 import { get } from "http";
+import { ComprehensiveCourseData } from "../model/ComprehensiveCourseData";
+import { Section } from "../model/Section";
+import { SectionMultimedia } from "../model/SectionMultimedia";
+import { Chapter } from "../model/Chapter";
 
 var path = require('path');
 const pgp = require('pg-promise')();
@@ -134,8 +138,7 @@ export const getAllCoursesByUserID = (req: Request, res: Response, next: NextFun
 };
 
 // ===============================================================================
-// GET COURSE BY Course ID (Overview course data without chapters data and sections data)
-// Remember: To refactor when Huay Eeih's stitching method is ready for integration
+// (1) Get Comprehensive Course Data (Commence data consolidation from Courses, Chapters, Sections, Materials)
 // ===============================================================================
 export const getComprehensiveCourseData = (req: Request, res: Response, next: NextFunction) => {
 
@@ -143,18 +146,26 @@ export const getComprehensiveCourseData = (req: Request, res: Response, next: Ne
     var chapterID: string;
     var sectionID: string;
 
-    const courseObject: any = {};
+    var courseData: any;
+    var chapterData: any[] = [];
+    var sectionData: any[] = [];
+    var materialData: any[] = [];
+
+    // const courseObject: any = {};
     
     // 1. Select Course By ID Query
     const queryChain = getOverviewCourseDataByCourseID(req, res, next)
         .then((response: any) => {
+
+            courseData = response.data[0];
             
             // 2. Select Chapters By Course ID
             return getChaptersDataByCourseID(req, res, courseID);
 
         })
         .then((response: any) => {
-
+            
+            chapterData.push(response.data[0]);
             chapterID = response.data[0].id;
             
             // 3. Get Sections by Chapter ID
@@ -163,11 +174,43 @@ export const getComprehensiveCourseData = (req: Request, res: Response, next: Ne
         })
         .then((response: any) => {
            
-            sectionID = response.data[0].id;
+            sectionData.push(response.data);
 
-            // 4. Get Materials by Section ID
-            return getMaterialsDataBySectionID(req, res, sectionID);
+            sectionData.forEach((s)=>{
+
+                // 4. Get Materials by Section ID
+                var sectionID = s.id;
+                console.log("Material Data - ", sectionID);
+                
+                
+
+            });
+
+            return materialData;
             
+        })
+        .then((response: any) => {
+
+            // materialData.push(response.data[0]);
+
+            // 5. Restitch Data
+            return restitchCourseData(
+                req, 
+                res,
+                courseData,
+                chapterData,
+                sectionData,
+                materialData
+            );
+
+        })
+        .then((response: any) => {
+
+            return res.status(200).json({
+                status: 200,
+                message: '[Success] Comprehensive Course Data retrieved',
+                data: response
+            });
         });
     
     // Select Sections By Each Section ID
@@ -177,8 +220,7 @@ export const getComprehensiveCourseData = (req: Request, res: Response, next: Ne
 }
 
 // ===============================================================================
-// GET COURSE BY Course ID (Overview course data without chapters data and sections data)
-// Remember: To refactor when Huay Eeih's stitching method is ready for integration
+// (2) GET COURSE BY Course ID (Overview course data without chapters data and sections data)
 // ===============================================================================
 export const getOverviewCourseDataByCourseID = (req: Request, res: Response, next: NextFunction) => {
 
@@ -233,7 +275,6 @@ export const getOverviewCourseDataByCourseID = (req: Request, res: Response, nex
 
 // ===============================================================================
 // GET CHAPTER BY Course ID (Overview course data without chapters data and sections data)
-// Remember: To refactor when Huay Eeih's stitching method is ready for integration
 // ===============================================================================
 export const getChaptersDataByCourseID = (req: Request, res: Response, courseID: string) => {
 
@@ -288,7 +329,6 @@ export const getChaptersDataByCourseID = (req: Request, res: Response, courseID:
 
 // ===============================================================================
 // GET SECTIONS BY Course ID (Overview course data without chapters data and sections data)
-// Remember: To refactor when Huay Eeih's stitching method is ready for integration
 // ===============================================================================
 export const getSectionsDataByChapterID = (req: Request, res: Response, chapterID: string) => {
 
@@ -339,7 +379,6 @@ export const getSectionsDataByChapterID = (req: Request, res: Response, chapterI
 
 // ===============================================================================
 // GET MATERIALS BY Course ID (Overview course data without chapters data and sections data)
-// Remember: To refactor when Huay Eeih's stitching method is ready for integration
 // ===============================================================================
 export const getMaterialsDataBySectionID = (req: Request, res: Response, sectionID: string) => {
 
@@ -388,10 +427,98 @@ export const getMaterialsDataBySectionID = (req: Request, res: Response, section
 
 };
 
+export const restitchCourseData = (
+    req: Request, 
+    res: Response,
+    courseData: any,
+    chapterData: any,
+    sectionData: any,
+    materialData: any
+) => {     
+
+    // =============================================
+    // STOP HERE 24/03/2025
+    // If I am revisiting this code back, READ THIS
+    // =============================================
+    // 
+    // We need to stitch the course data with the chapter data, section data and material data
+    // This is done by iterating through the course data and adding the chapter data, section data and material data
+    // to the course data. Same thing for sections to chapters
+    // This build is only developed for the backend testbed. 
+    // 
+    // UPDATE 26/03
+    // I have now implemented the stitching method.
+    // But, the section data is missing at some point of the stitching process
+    // If I revisit this code back, USE BREAKPOINTS AND DEBUG WHERE IT DISAPPEARED
+    // ==============================================
+
+    // Instantiate arrays
+
+    var courseChapters: Chapter[] = [];
+    var courseSections: Section[] = [];
+    var courseMaterials: SectionMultimedia[] = [];
+    
+    console.log("")
+    
+    // If section has materials
+    if("id" in materialData){
+        
+        // Push multimedia data into array
+        materialData.forEach((material: any, index: number) => {
+            
+            courseMaterials.push({
+                chapterNumber: chapterData[index].chapter_number,
+                file: `${material.id}-${material.file_path}.${material.file_type}`,
+                sectionNumber: sectionData[index].section_number
+            });
+        
+        });
+
+    }else{
 
 
+    }
 
+    // Push section data into array
+    sectionData.forEach((section: any, index: number) => {
+    
+        courseSections.push({
+            sectionNumber: section.section_number,
+            sectionTitle: section.name,
+            sectionDescription: section.section_description,
+            sectionOutcome: section.section_outcome,
+            sectionMultimedia: courseMaterials[index]
+        });
+    
+    });
 
+    // Push chapter data into array
+    chapterData.forEach((chapter: any, index: number) => {
+    
+        courseChapters.push({
+            chapterNumber: chapter.chapter_number,
+            chapterTitle: chapter.name,
+            section: courseSections
+        });
+    
+    });
+
+    // Bring it all together
+    var comprehensiveCourseData: ComprehensiveCourseData = {
+ 
+        courseChapters: courseChapters,
+        courseTitle: courseData.name,
+        courseDescription: courseData.description,
+        learningObjectives: '', // [!!] Not yet implemented in DB
+        topic: courseData.topic
+
+    };
+
+    console.log('')
+
+    return comprehensiveCourseData;
+
+};
 
 export const getAllCourse_SuperUser = (req: Request, res: Response, next: NextFunction) => {
     
