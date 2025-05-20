@@ -20,10 +20,10 @@ While it is WIP at the moment, it aims to handle these from the frontend and DB:
 3. Post it on Github Page.
 
 ## Backend Tools
-**Framework** - Express Typescript
-**DB CRUD Handler** - PG-Promise
-**CORS Proxy** - CORS
-**Unstructured Data Handling** - Multer
+1. **Framework** - Express Typescript
+2. **DB CRUD Handler** - PG-Promise
+3. **CORS Proxy** - CORS
+4. **Unstructured Data Handling** - Multer
 
 WIP.
 
