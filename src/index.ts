@@ -34,7 +34,32 @@ const upload = multer({
       const uniqueSuffix = Math.round(Math.random() * 1E9);
       const fileNameWithoutExtension = file.originalname.split('.')[0];
       const fileExtension = file.originalname.split('.')[1];
-      const reconstructedFileName = fileNameWithoutExtension + '-' + uniqueSuffix + '.' + fileExtension;
+      const reconstructedFileName = fileNameWithoutExtension + '.' + fileExtension;
+      
+      cb(null, reconstructedFileName);
+
+    }
+
+  })
+
+});
+
+const coverImageUpload = multer({
+  
+  storage: multer.diskStorage({
+
+    destination: (req: any, file: FileMetaData, cb: any) => {
+
+      cb(null, __dirname + "/course-multimedia/images/course-image-cover/")
+
+    },
+
+    filename: (req: any, file: FileMetaData, cb: any) => {
+
+      // const uniqueSuffix = Math.round(Math.random() * 1E9);
+      const fileNameWithoutExtension = file.originalname.split('.')[0];
+      const fileExtension = file.originalname.split('.')[1];
+      const reconstructedFileName = fileNameWithoutExtension + '.' + fileExtension;
       
       cb(null, reconstructedFileName);
 
