@@ -609,7 +609,7 @@ export const postNewCourse = async (req: Request, res: Response, next: NextFunct
                 const multimediaFileName = split1.split('.')[0];
                 const multimediaFormat = split1.split('.')[1];
 
-                // Get multimediaID (created at frontend) from section data
+                // Generate a unique UUID for section's multimedia (module video, slides etc.)
                 const multimediaID = uuidv4();
 
                 // Insert section data into section table first

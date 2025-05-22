@@ -115,7 +115,8 @@ app.post('/api/course/all', (req:Request, res:Response, next:NextFunction) => {
 // POST Create New Course 
 // Accepts FormData and user-input New Course Data
 // ==================================
-app.post('/api/course/new', courseMultimediaUpload.array('files[]'), (req: Request, res: Response, next: NextFunction) => {
+// app.post('/api/course/new', courseMultimediaUpload.array('files[]'), (req: Request, res: Response, next: NextFunction) => {
+app.post('/api/course/new', (req: Request, res: Response, next: NextFunction) => {
 
   // console.log("[postNewCourse | FormData Upload] Hit", JSON.parse(req.body?.courseData));
   postNewCourse(req, res, next);
@@ -125,17 +126,29 @@ app.post('/api/course/new', courseMultimediaUpload.array('files[]'), (req: Reque
 // ==================================
 // POST Upload New Course Multimedia (SHELVED)
 // ==================================
-// app.post('/api/course/new/upload', upload.array('files[]'), (req: Request, res: Response) => {
+app.post('/api/course/new/multimedia-upload', courseMultimediaUpload.array('files[]'), (req: Request, res: Response) => {
 
-//   console.log("[postNewCourse | Multimedia Upload] Hit", req.files);
+  console.log("[postNewCourse | Multimedia Upload] Hit", req.files);
 
-//   res.status(200).send({
-//     status: 200,
-//     message: "Multimedia Files uploaded successfully",
-//     timestamp: getCurrentTimestamp()
-//   })
+  res.status(200).send({
+    status: 200,
+    message: "Multimedia Files uploaded successfully",
+    timestamp: getCurrentTimestamp()
+  })
 
-// });
+});
+
+app.post('/api/course/new/course-image-cover-upload', courseCoverImageUpload.array('courseCoverImage'), (req: Request, res: Response) => {
+
+  console.log("[postNewCourse | Multimedia Upload] Hit", req.files);
+
+  res.status(200).send({
+    status: 200,
+    message: "Course Image Cover File uploaded successfully",
+    timestamp: getCurrentTimestamp()
+  })
+
+});
 
 
 // ==================================
