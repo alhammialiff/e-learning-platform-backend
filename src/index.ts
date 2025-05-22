@@ -19,7 +19,7 @@ const cors = require('cors');
 // =================================
 // Multer File Upload Config
 // =================================
-const upload = multer({
+const courseMultimediaUpload = multer({
   
   storage: multer.diskStorage({
 
@@ -44,7 +44,7 @@ const upload = multer({
 
 });
 
-const coverImageUpload = multer({
+const courseCoverImageUpload = multer({
   
   storage: multer.diskStorage({
 
@@ -115,7 +115,7 @@ app.post('/api/course/all', (req:Request, res:Response, next:NextFunction) => {
 // POST Create New Course 
 // Accepts FormData and user-input New Course Data
 // ==================================
-app.post('/api/course/new', upload.array('files[]'), (req: Request, res: Response, next: NextFunction) => {
+app.post('/api/course/new', courseMultimediaUpload.array('files[]'), (req: Request, res: Response, next: NextFunction) => {
 
   // console.log("[postNewCourse | FormData Upload] Hit", JSON.parse(req.body?.courseData));
   postNewCourse(req, res, next);

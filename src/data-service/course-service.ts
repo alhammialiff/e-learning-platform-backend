@@ -575,7 +575,7 @@ export const postNewCourse = async (req: Request, res: Response, next: NextFunct
     // Parse Section Data with ChapterID
     // ===================
     // const courseData = {...req.body.data};
-    const courseData = JSON.parse(req.body?.courseData);
+    const courseData = req.body?.data;
     const chapterData = {...courseData.courseChapters[0]};
     const sectionData = courseData.courseChapters[0].section;
 
@@ -610,7 +610,7 @@ export const postNewCourse = async (req: Request, res: Response, next: NextFunct
                 const multimediaFormat = split1.split('.')[1];
 
                 // Get multimediaID (created at frontend) from section data
-                const multimediaID = section?.multimediaID;
+                const multimediaID = uuidv4();
 
                 // Insert section data into section table first
                 return insertSectionIntoSectionTable(section, chapterID, sectionID, res)
